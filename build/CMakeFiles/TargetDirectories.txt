@@ -1,0 +1,3 @@
+/home/toto/tek/neuralNetworks/build/CMakeFiles/myTorch.dir
+/home/toto/tek/neuralNetworks/build/CMakeFiles/edit_cache.dir
+/home/toto/tek/neuralNetworks/build/CMakeFiles/rebuild_cache.dir

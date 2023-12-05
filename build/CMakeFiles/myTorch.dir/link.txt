@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/myTorch.dir/src/main.cpp.o CMakeFiles/myTorch.dir/src/neuralNetwork.cpp.o -o /home/toto/tek/neuralNetworks/myTorch 
