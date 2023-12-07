@@ -12,6 +12,7 @@
 NeuralNetwork::NeuralNetwork(std::vector<int> config, float learningRate)
 {
     _learningRate = learningRate;
+    std::cout << "learning rate: " << _learningRate << std::endl;
     _config = config;
     for (int i = 0 ; i < config.size() ; i++) {
         //initialize neurons
@@ -25,7 +26,7 @@ NeuralNetwork::NeuralNetwork(std::vector<int> config, float learningRate)
         if (i != 0) {
             _bias.push_back(new Vector(config[i]));
             for (int j = 0 ; j < config[i] ; j++)
-                _bias.back()->coeffRef(j) = 1;
+                _bias.back()->coeffRef(j) = 3;
         }
 
         //initialize weights
@@ -40,11 +41,13 @@ NeuralNetwork::NeuralNetwork(std::vector<int> config, float learningRate)
 float activation(float x)
 {
     return tanhf(x);
+    // return 1 / (1 + exp(-x));
 }
 
 float activationFunctionDerivative(float x)
 {
     return 1 - (tanhf(x) * tanhf(x));
+    // return x * (1 - x);
 }
 
 void NeuralNetwork::propagateForward(Vector &input)
@@ -53,7 +56,7 @@ void NeuralNetwork::propagateForward(Vector &input)
 
     for (int i = 1 ; i < _neurons.size() ; i++) {
         *_neurons[i] = (*_neurons[i - 1]) * (*_weights[i - 1]);
-        _neurons[i]->unaryExpr(std::function(activation));
+        *_neurons[i] =  _neurons[i]->unaryExpr(std::function<float(float)>(activation));
     }
 }
 
@@ -68,17 +71,6 @@ void NeuralNetwork::calculateCost(Vector &output)
 
 void NeuralNetwork::updateWeights()
 {
-    // for (int i = 0; i < _weights.size(); i++) {
-    //     Matrix weightUpdate = _learningRate * (*_neurons[i]).transpose() * (*_costs[i + 1]);
-
-    //     // Gradient clipping (adjust  threshold as needed)
-    //     double threshold = 1.0;
-    //     weightUpdate = weightUpdate.array().max(-threshold).min(threshold);
-
-    //     *_weights[i] -= weightUpdate;
-    // }
-
-    std::cout << "update weights" << std::endl;
 
     for (uint i = 0; i < _config.size() - 1; i++) {
         for (uint c = 0; c < _weights[i]->cols(); c++) {
@@ -95,7 +87,6 @@ void NeuralNetwork::updateWeights()
             }
         }
     }
-    std::cout << "update bias" << std::endl;
 }
 
 void NeuralNetwork::backPropagation(Vector &expected)

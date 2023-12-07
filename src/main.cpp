@@ -111,8 +111,6 @@ void parseChessFile(const std::string& filename, int trainingSteps, int examples
                 checkmate = false;
             else
                 continue; // Skip this example
-            std::cout << "Checkmate: " << checkmate << std::endl;
-            std::cout << "[" << token << "]" << std::endl;
 
             // Process the FEN and board representation
 
@@ -163,21 +161,46 @@ void exploit(NeuralNetwork &test, std::vector<Vector> &input, std::vector<Vector
             count++;
         else if (test.getOutput()[0] < 0.5 && output[i][0] == 0)
             count++;
-        std::cout << "output: " << test.getOutput()[0] << " expected: " << output[i][0] << std::endl;
+        else 
+            std::cout << "output: " << test.getOutput()[0] << " expected: " << output[i][0] << std::endl;
     }
     std::cout << "exploit: " << count << "/" << input.size() << std::endl;
 }
 
+void shuffle(std::vector<Vector> &input, std::vector<Vector> &output)
+{
+    std::vector<Vector> tmpInput;
+    std::vector<Vector> tmpOutput;
+    int random;
+    while (input.size() > 0) {
+        random = rand() % input.size();
+        tmpInput.push_back(input[random]);
+        tmpOutput.push_back(output[random]);
+        input.erase(input.begin() + random);
+        output.erase(output.begin() + random);
+    }
+    input = tmpInput;
+    output = tmpOutput;
+}
+
 int main()
 {
-    std::vector<int> config = {64, 16, 16, 1};
+    std::vector<int> config = {64, 32, 16, 1};
     NeuralNetwork test(config);
     std::vector<Vector> input;
     std::vector<Vector> output;
-    parseChessFile("DataSets/datasets/checkmate/10_pieces.txt", 1, 300, input, output);
+    parseChessFile("DataSets/datasets/checkmate/10_pieces.txt", 1, 100000, input, output);
+    parseChessFile("DataSets/datasets/checkmate/20_pieces.txt", 1, 100000, input, output);
+    parseChessFile("DataSets/datasets/boards/10_pieces.txt", 1, 100000, input, output);
+    parseChessFile("DataSets/datasets/boards/lots_pieces.txt", 1, 100000, input, output);
+    parseChessFile("DataSets/datasets/checkmate/lots_pieces.txt", 1, 105000, input, output);
+    parseChessFile("DataSets/datasets/boards/20_pieces.txt", 1, 100000, input, output);
+
+    shuffle(input, output);
 
     test.train(input, output);
 
+    shuffle(input, output);
     exploit(test, input, output);
     test.saveToFile("test.txt");
     return 0;
