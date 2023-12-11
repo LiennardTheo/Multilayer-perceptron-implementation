@@ -26,7 +26,7 @@ NeuralNetwork::NeuralNetwork(std::vector<int> config, float learningRate)
         if (i != 0) {
             _bias.push_back(new Vector(config[i]));
             for (int j = 0 ; j < config[i] ; j++)
-                _bias.back()->coeffRef(j) = 3;
+                _bias.back()->coeffRef(j) = 1;
         }
 
         //initialize weights
@@ -83,7 +83,7 @@ void NeuralNetwork::updateWeights()
                 gradient = std::max(-threshold, std::min(gradient, threshold));
 
                 // Mise à jour des poids
-                _weights[i]->coeffRef(r, c) += gradient;
+                _weights[i]->coeffRef(r, c) += gradient; // - ?
             }
         }
     }
@@ -91,7 +91,9 @@ void NeuralNetwork::updateWeights()
 
 void NeuralNetwork::backPropagation(Vector &expected)
 {
+    std::cout << "backpropagation" << std::endl;
     calculateCost(expected);
+    std::cout << "calculated cost" << std::endl;
     updateWeights();
 }
 
@@ -129,6 +131,12 @@ void NeuralNetwork::saveToFile(std::string filename)
 {
     std::ofstream file(filename);
     if (file.is_open()) {
+        file << _config.size() << std::endl;
+        for (int i = 0 ; i < _config.size() ; i++) {
+            file << _config[i] << " ";
+        }
+        file << std::endl;
+
         for (int i = 0 ; i < _weights.size() ; i++) {
             for (int j = 0 ; j < _weights[i]->rows() ; j++) {
                 for (int k = 0 ; k < _weights[i]->row(j).size() ; k++) {
@@ -153,6 +161,23 @@ void NeuralNetwork::loadFromFile(std::string filneame)
 {
     std::ifstream file(filneame);
     if (file.is_open()) {
+        int configSize;
+        file >> configSize;
+        _config.clear();
+        for (int i = 0 ; i < configSize ; i++) {
+            int tmp;
+            file >> tmp;
+            _neurons[i]->resize(tmp);
+            _costs[i]->resize(tmp);
+            _caches[i]->resize(tmp);
+            _config.push_back(tmp);
+            std::cout << "config :" << std::endl;
+            for (int j = 0 ; j < _config.size() ; j++) {
+                std::cout << _config[j] << " ";
+            }
+            std::cout << std::endl;
+        }
+
         for (int i = 0 ; i < _weights.size() ; i++) {
             for (int j = 0 ; j < _weights[i]->rows() ; j++) {
                 for (int k = 0 ; k < _weights[i]->row(j).size() ; k++) {

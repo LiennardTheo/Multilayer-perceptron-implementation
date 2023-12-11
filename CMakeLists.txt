@@ -11,6 +11,7 @@ set(
         SOURCES
         src/main.cpp
         src/neuralNetwork.cpp
+        src/parser.cpp
 )
 
 add_executable(myTorch ${SOURCES})
