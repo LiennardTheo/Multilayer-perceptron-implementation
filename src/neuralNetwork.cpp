@@ -83,7 +83,7 @@ void NeuralNetwork::updateWeights()
                 gradient = std::max(-threshold, std::min(gradient, threshold));
 
                 // Mise à jour des poids
-                _weights[i]->coeffRef(r, c) += gradient; // - ?
+                _weights[i]->coeffRef(r, c) += gradient;
             }
         }
     }
@@ -164,12 +164,17 @@ void NeuralNetwork::loadFromFile(std::string filneame)
         int configSize;
         file >> configSize;
         _config.clear();
+        _neurons.clear();
+        _weights.clear();
+        _bias.clear();
+        _costs.clear();
+        _caches.clear();
         for (int i = 0 ; i < configSize ; i++) {
             int tmp;
             file >> tmp;
-            _neurons[i]->resize(tmp);
-            _costs[i]->resize(tmp);
-            _caches[i]->resize(tmp);
+            _neurons.push_back(new Vector(tmp));
+            _costs.push_back(new Vector(tmp));
+            _caches.push_back(new Vector(tmp));
             _config.push_back(tmp);
             std::cout << "config :" << std::endl;
             for (int j = 0 ; j < _config.size() ; j++) {
@@ -178,7 +183,8 @@ void NeuralNetwork::loadFromFile(std::string filneame)
             std::cout << std::endl;
         }
 
-        for (int i = 0 ; i < _weights.size() ; i++) {
+        for (int i = 0 ; i < _config.size() - 1 ; i++) {
+            _weights.push_back(new Matrix(_config[i], _config[i + 1]));
             for (int j = 0 ; j < _weights[i]->rows() ; j++) {
                 for (int k = 0 ; k < _weights[i]->row(j).size() ; k++) {
                     file >> _weights[i]->row(j)[k];
@@ -186,7 +192,8 @@ void NeuralNetwork::loadFromFile(std::string filneame)
             }
         }
 
-        for (int i = 0 ; i < _bias.size() ; i++) {
+        for (int i = 0 ; i < _config.size() - 1 ; i++) {
+            _bias.push_back(new Vector(_config[i + 1]));
             for (int j = 0 ; j < _bias[i]->size() ; j++) {
                 file >> _bias[i]->coeffRef(j);
             }

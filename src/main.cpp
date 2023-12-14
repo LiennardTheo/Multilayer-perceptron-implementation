@@ -101,7 +101,19 @@ void parseChessFile(const std::string& filename, int trainingSteps, int examples
         if (line.empty()) continue;
 
         if (line.find("RES") != std::string::npos) {
+            std::istringstream izz(line);
+            izz >> token >> token;
+            bool pat;
+            if (token == "1/2-1/2")
+                pat = true;
+            else
+                pat = false;
+
+            std::cout << "[" << token << "] ";
+            std::cout << "pat: " << pat << std::endl;
+
             std::getline(file, line);
+            std::cout << line << std::endl;
 
             std::istringstream iss(line);
             iss >> token >> token;
@@ -120,22 +132,27 @@ void parseChessFile(const std::string& filename, int trainingSteps, int examples
             iss2 >> token >> token;
             parseFEN(token, inputVec);
 
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 9; i++) {
                 std::getline(file, line);
             }
 
             input.push_back(inputVec);
 
-            Vector outputVec(1);
-            outputVec << (checkmate ? 1.0f : 0.0f);
+            Vector outputVec(3);
+            outputVec[0] = (checkmate ? 1.0f : 0.0f);
+            outputVec[1] = (pat ? 1.0f : 0.0f);
+            outputVec[2] = (!checkmate && !pat ? 1.0f : 0.0f);
             output.push_back(outputVec);
 
             collectedExamples++;
             if (collectedExamples >= totalExamples) {
                 return;
             }
+        } else {
+            std::cout << "line skipped : " << line << std::endl;
         }
     }
+    std::cout << "done" << std::endl;
 
     file.close();
 }
@@ -158,15 +175,20 @@ void exploit(NeuralNetwork &test, std::vector<Vector> &input, std::vector<Vector
     int count = 0;
     int checkmates = 0;
     int boards = 0;
+    int localCount = 0;
     for (int i = 0 ; i < input.size() ; i++) {
         test.propagateForward(input[i]);
-        if (test.getOutput()[0] > 0.5 && output[i][0] == 1)
+        std::cout << "board " << i << std::endl;
+        for (int j = 0 ; j < output[i].size() ; j++) {
+            if (test.getOutput()[j] > 0.5 && output[i][j] == 1)
+                localCount++;
+            else if (test.getOutput()[j] < 0.5 && output[i][j] == 0)
+                localCount++;
+            else
+                std::cout << "output: " << test.getOutput()[j] << " expected: " << output[i][j] << std::endl;
+        }
+        if (localCount == output[i].size())
             count++;
-        else if (test.getOutput()[0] < 0.5 && output[i][0] == 0)
-            count++;
-        else 
-            std::cout << "output: " << test.getOutput()[0] << " expected: " << output[i][0] << std::endl;
-
         if (output[i][0] == 1)
             checkmates++;
         else
@@ -195,7 +217,8 @@ void process(NeuralNetwork &network, Parsing_t &parsing)
     std::vector<Vector> input;
     std::vector<Vector> output;
 
-    parseChessFile(parsing.chessboardsFile, 100, 100, input, output);
+    std::cout << "Parsing chessboards file :" << parsing.chessboardsFile << std::endl;
+    parseChessFile(parsing.chessboardsFile, 1, 10, input, output);
     shuffle(input, output);
 
     if (parsing.trainMode) {
