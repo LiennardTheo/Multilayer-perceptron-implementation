@@ -49,10 +49,12 @@ This program can be use to perform various operation on a neural network, here i
 ## Benchmark
 
 ```mermaid
-    xychart-beta
-        title "Neural network accuracy"
-        x-axis [jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec]
-        y-axis "Accuracy (in %)" 0 --> 100
-        bar [0]
-        line [0]
+    xychart beta
+    title Neural network accuracy
+    x-axis jan feb mar apr may jun jul aug sep oct nov dec
+    y-axis Accuracy (in %) 0 --> 100
+    data bar
+        0 40 60 80 90 95 85 88 92 94 96 98
+    data line
+        0 30 50 70 85 92 80 82 85 88 90 92
 ```
