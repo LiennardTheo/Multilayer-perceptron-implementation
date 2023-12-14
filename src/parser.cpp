@@ -9,7 +9,7 @@
 
 void usage()
 {
-    std::cout << "Usage: ./myTorch [...] = MANDATORY / () = Optional\n [-n IN_LAYER [HIDDEN_LAYERS...] OUT_LAYER | -l LOADFILE]\n [-t (to train the network) | -p (to check how the network is performing)]\n (-s SAVEFILE)\n [FILE (File containing dataset)]\n";
+    std::cout << "Usage: ./myTorch [...] = MANDATORY / () = Optional\n [-n IN_LAYER (HIDDEN_LAYERS...) OUT_LAYER | -l LOADFILE]\n (-t (to train the network) | -p (to check how the network is performing))\n (-s SAVEFILE)\n [FILE (File containing dataset)]\n (-r LEARNING_RATE (default 0.005))\n (-m ACTIVATION FUNCTION (either \"sigmoid\" or \"tanhf\"))" << std::endl;
     exit(0);
 }
 
@@ -18,7 +18,7 @@ Parsing_t parseArgs(int ac, char **av)
     int opt;
     Parsing_t parsing;
 
-    while ((opt = getopt(ac, av, "hn:l:tps:")) != -1) {
+    while ((opt = getopt(ac, av, "hn:l:tps:r:m:")) != -1) {
         switch (opt) {
             case 'h':
                 usage();
@@ -42,14 +42,18 @@ Parsing_t parseArgs(int ac, char **av)
             case 's':
                 parsing.saveFile = optarg;
                 break;
+            case 'r':
+                parsing.learningRate = std::stof(optarg);
+                break;
+            case 'm':
+                parsing.activationFunction = optarg;
+                break;
             default:
                 usage();
         }
     }
 
     // Retrieve the non-option argument (chessboards file)
-    std::cout << "optind: " << optind << std::endl;
-    std::cout << "ac: " << ac << std::endl;
     if (parsing.trainMode || parsing.predictMode) {
         if (optind < ac)
             parsing.chessboardsFile = av[optind];

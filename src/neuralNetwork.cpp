@@ -9,7 +9,27 @@
 
 #include <fstream>
 
-NeuralNetwork::NeuralNetwork(std::vector<int> config, float learningRate)
+float tanhf_activation(float x)
+{
+    return tanhf(x);
+}
+
+float sigmoid(float x)
+{
+    return 1 / (1 + exp(-x));
+}
+
+float tanhf_activationFunctionDerivative(float x)
+{
+    return 1 - (tanhf(x) * tanhf(x));
+}
+
+float sigmoid_activationFunctionDerivative(float x)
+{
+    return x * (1 - x);
+}
+
+NeuralNetwork::NeuralNetwork(std::vector<int> config, std::string activation, float learningRate)
 {
     _learningRate = learningRate;
     std::cout << "learning rate: " << _learningRate << std::endl;
@@ -35,27 +55,20 @@ NeuralNetwork::NeuralNetwork(std::vector<int> config, float learningRate)
             _weights.back()->setRandom();
         }
     }
+
+    //initialize activation function
+    if (activation == "tanhf") {
+        _activationFunction = std::function<float(float)>(tanhf_activation);
+        _activationFunctionDerivative = std::function<float(float)>(tanhf_activationFunctionDerivative);
+    } else if (activation == "sigmoid") {
+        _activationFunction = std::function<float(float)>(sigmoid);
+        _activationFunctionDerivative = std::function<float(float)>(sigmoid_activationFunctionDerivative);
+    } else {
+        std::cerr << "Invalid activation function" << std::endl;
+        exit(84);
+    }
+
     debugPrints();
-}
-
-float tanhf_activation(float x)
-{
-    return tanhf(x);
-}
-
-float sigmoid(float x)
-{
-    return 1 / (1 + exp(-x));
-}
-
-float tanhf_activationFunctionDerivative(float x)
-{
-    return 1 - (tanhf(x) * tanhf(x));
-}
-
-float sigmoid_activationFunctionDerivative(float x)
-{
-    return x * (1 - x);
 }
 
 void NeuralNetwork::propagateForward(Vector &input)
@@ -64,7 +77,7 @@ void NeuralNetwork::propagateForward(Vector &input)
 
     for (int i = 1 ; i < _neurons.size() - 1 ; i++) {
         *_neurons[i] = (*_neurons[i - 1]) * (*_weights[i - 1]);
-        *_neurons[i] =  _neurons[i]->unaryExpr(std::function<float(float)>(tanhf_activation));
+        *_neurons[i] =  _neurons[i]->unaryExpr(_activationFunction);
     }
 
     *_neurons.back() = (*_neurons[_neurons.size() - 2]) * (*_weights[_weights.size() - 1]);
@@ -102,7 +115,7 @@ void NeuralNetwork::updateWeights()
         for (uint c = 0; c < _weights[i]->cols(); c++) {
             for (uint r = 0; r < _weights[i]->rows(); r++) {
                 // Calcul du gradient
-                double gradient = _learningRate * _costs[i + 1]->coeffRef(c) * tanhf_activationFunctionDerivative(_caches[i + 1]->coeffRef(c)) * _neurons[i]->coeffRef(r);
+                double gradient = _learningRate * _costs[i + 1]->coeffRef(c) * _activationFunctionDerivative(_caches[i + 1]->coeffRef(c)) * _neurons[i]->coeffRef(r);
                 
                 // Gradient clipping
                 double threshold = 1.0;
@@ -145,7 +158,9 @@ void NeuralNetwork::debugPrints()
 
 void NeuralNetwork::train(std::vector<Vector> &input, std::vector<Vector> &output)
 {
+    std::cout << "training on dataSet of size :" << input.size() << std::endl;
     for (int i = 0 ; i < input.size() ; i++) {
+        std::cout << "board " << i << std::endl;
         propagateForward(input[i]);
         backPropagation(output[i]);
     }

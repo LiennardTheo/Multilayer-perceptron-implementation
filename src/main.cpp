@@ -212,18 +212,24 @@ void process(NeuralNetwork &network, Parsing_t &parsing)
     std::vector<Vector> output;
 
     if (parsing.predictMode || parsing.trainMode) {
-        std::cout << "Parsing chessboards file :" << parsing.chessboardsFile << std::endl;
+        std::cout << "Parsing chessboards file :" << parsing.chessboardsFile << "..." << std::endl;
         parseChessFile(parsing.chessboardsFile, 1, 1000000, input, output);
+        std::cout << "Parsing done" << std::endl;
+        std::cout << "Shuffling..." << std::endl;
         shuffle(input, output);
+        std::cout << "Shuffling done" << std::endl;
 
         if (parsing.trainMode) {
+            std::cout << "Training..." << std::endl;
             network.train(input, output);
+            std::cout << "Training done" << std::endl;
         } else if (parsing.predictMode) {
             exploit(network, input, output);
         }
     }
 
     if (!parsing.saveFile.empty()) {
+        std::cout << "Saving network to file: " << parsing.saveFile << std::endl;
         network.saveToFile(parsing.saveFile);
     }
 }
@@ -247,11 +253,21 @@ int main(int ac, char **av)
         std::cout << std::endl;
     }
 
-    NeuralNetwork network(config, parsing.learningRate);
+    if (parsing.activationFunction == "sigmoid") {
+        std::cout << "Using sigmoid activation function" << std::endl;
+    } else if (parsing.activationFunction == "tanhf") {
+        std::cout << "Using tanhf activation function" << std::endl;
+    } else {
+        std::cerr << "Error : Activation function not supported" << std::endl;
+        usage();
+    }
+
+    NeuralNetwork network(config, parsing.activationFunction, parsing.learningRate);
 
     if (!parsing.loadFile.empty()) {
         network.loadFromFile(parsing.loadFile);
     }
+
     process(network, parsing);
 
     return 0;

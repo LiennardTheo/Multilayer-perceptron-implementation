@@ -18,6 +18,7 @@ typedef struct Parsing {
     bool predictMode = false;
     std::string saveFile;
     std::string chessboardsFile;
+    std::string activationFunction = "tanhf";
     float learningRate = 0.005;
 } Parsing_t;
 

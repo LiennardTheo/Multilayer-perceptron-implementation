@@ -16,7 +16,7 @@ typedef Eigen::MatrixXf Matrix;
 
 class NeuralNetwork {
     public:
-        NeuralNetwork(std::vector<int> config, float learningRate = 0.005f);
+        NeuralNetwork(std::vector<int> config, std::string activation,  float learningRate = 0.005f);
         ~NeuralNetwork() = default;
 
         void propagateForward(Vector &input);
@@ -44,6 +44,8 @@ class NeuralNetwork {
         std::vector<Vector *> _costs;
         std::vector<Vector *> _caches;
         std::vector<int> _config;
+        std::function<float(float)> _activationFunction;
+        std::function<float(float)> _activationFunctionDerivative;
         float _learningRate;
 };
 
