@@ -48,10 +48,16 @@ Parsing_t parseArgs(int ac, char **av)
     }
 
     // Retrieve the non-option argument (chessboards file)
-    if (optind < ac) {
-        parsing.chessboardsFile = av[optind];
+    std::cout << "optind: " << optind << std::endl;
+    std::cout << "ac: " << ac << std::endl;
+    if (parsing.trainMode || parsing.predictMode) {
+        if (optind < ac)
+            parsing.chessboardsFile = av[optind];
+        else
+            usage();
     } else {
-        usage();
+        if (optind > ac)
+            usage();
     }
 
     return parsing;

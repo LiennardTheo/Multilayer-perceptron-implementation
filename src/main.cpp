@@ -109,11 +109,7 @@ void parseChessFile(const std::string& filename, int trainingSteps, int examples
             else
                 pat = false;
 
-            std::cout << "[" << token << "] ";
-            std::cout << "pat: " << pat << std::endl;
-
             std::getline(file, line);
-            std::cout << line << std::endl;
 
             std::istringstream iss(line);
             iss >> token >> token;
@@ -148,11 +144,8 @@ void parseChessFile(const std::string& filename, int trainingSteps, int examples
             if (collectedExamples >= totalExamples) {
                 return;
             }
-        } else {
-            std::cout << "line skipped : " << line << std::endl;
         }
     }
-    std::cout << "done" << std::endl;
 
     file.close();
 }
@@ -189,6 +182,7 @@ void exploit(NeuralNetwork &test, std::vector<Vector> &input, std::vector<Vector
         }
         if (localCount == output[i].size())
             count++;
+        localCount = 0;
         if (output[i][0] == 1)
             checkmates++;
         else
@@ -217,14 +211,16 @@ void process(NeuralNetwork &network, Parsing_t &parsing)
     std::vector<Vector> input;
     std::vector<Vector> output;
 
-    std::cout << "Parsing chessboards file :" << parsing.chessboardsFile << std::endl;
-    parseChessFile(parsing.chessboardsFile, 1, 10, input, output);
-    shuffle(input, output);
+    if (parsing.predictMode || parsing.trainMode) {
+        std::cout << "Parsing chessboards file :" << parsing.chessboardsFile << std::endl;
+        parseChessFile(parsing.chessboardsFile, 1, 1000000, input, output);
+        shuffle(input, output);
 
-    if (parsing.trainMode) {
-        network.train(input, output);
-    } else if (parsing.predictMode) {
-        exploit(network, input, output);
+        if (parsing.trainMode) {
+            network.train(input, output);
+        } else if (parsing.predictMode) {
+            exploit(network, input, output);
+        }
     }
 
     if (!parsing.saveFile.empty()) {
@@ -235,11 +231,6 @@ void process(NeuralNetwork &network, Parsing_t &parsing)
 int main(int ac, char **av)
 {
     Parsing_t parsing = parseArgs(ac, av);
-
-    if (!parsing.trainMode && !parsing.predictMode) {
-        std::cerr << "Error : You must specify either -t (train) or -p (predict)" << std::endl;
-        usage();
-    }
 
     if (parsing.newNetworkConfig.empty() && parsing.loadFile.empty()) {
         std::cerr << "Error : You must specify either -n (new network) or -l (load network)" << std::endl;

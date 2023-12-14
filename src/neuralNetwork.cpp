@@ -38,26 +38,37 @@ NeuralNetwork::NeuralNetwork(std::vector<int> config, float learningRate)
     debugPrints();
 }
 
-float activation(float x)
+float tanhf_activation(float x)
 {
     return tanhf(x);
-    // return 1 / (1 + exp(-x));
 }
 
-float activationFunctionDerivative(float x)
+float sigmoid(float x)
+{
+    return 1 / (1 + exp(-x));
+}
+
+float tanhf_activationFunctionDerivative(float x)
 {
     return 1 - (tanhf(x) * tanhf(x));
-    // return x * (1 - x);
+}
+
+float sigmoid_activationFunctionDerivative(float x)
+{
+    return x * (1 - x);
 }
 
 void NeuralNetwork::propagateForward(Vector &input)
 {
     (*_neurons.front()) = input;
 
-    for (int i = 1 ; i < _neurons.size() ; i++) {
+    for (int i = 1 ; i < _neurons.size() - 1 ; i++) {
         *_neurons[i] = (*_neurons[i - 1]) * (*_weights[i - 1]);
-        *_neurons[i] =  _neurons[i]->unaryExpr(std::function<float(float)>(activation));
+        *_neurons[i] =  _neurons[i]->unaryExpr(std::function<float(float)>(tanhf_activation));
     }
+
+    *_neurons.back() = (*_neurons[_neurons.size() - 2]) * (*_weights[_weights.size() - 1]);
+    *_neurons.back() = _neurons.back()->unaryExpr(std::function<float(float)>(sigmoid));
 }
 
 void NeuralNetwork::calculateCost(Vector &output)
@@ -72,11 +83,26 @@ void NeuralNetwork::calculateCost(Vector &output)
 void NeuralNetwork::updateWeights()
 {
 
+    // Update weights between last hidden layer and output layer using sigmoid activation function derivative
+    for (uint c = 0; c < _weights.back()->cols(); c++) {
+        for (uint r = 0; r < _weights.back()->rows(); r++) {
+            // Calcul du gradient
+            double gradient = _learningRate * _costs.back()->coeffRef(c) * sigmoid_activationFunctionDerivative(_caches.back()->coeffRef(c)) * _neurons[_neurons.size() - 2]->coeffRef(r);
+            
+            // Gradient clipping
+            double threshold = 1.0;
+            gradient = std::max(-threshold, std::min(gradient, threshold));
+
+            // Mise à jour des poids
+            _weights.back()->coeffRef(r, c) += gradient;
+        }
+    }
+
     for (uint i = 0; i < _config.size() - 1; i++) {
         for (uint c = 0; c < _weights[i]->cols(); c++) {
             for (uint r = 0; r < _weights[i]->rows(); r++) {
                 // Calcul du gradient
-                double gradient = _learningRate * _costs[i + 1]->coeffRef(c) * activationFunctionDerivative(_caches[i + 1]->coeffRef(c)) * _neurons[i]->coeffRef(r);
+                double gradient = _learningRate * _costs[i + 1]->coeffRef(c) * tanhf_activationFunctionDerivative(_caches[i + 1]->coeffRef(c)) * _neurons[i]->coeffRef(r);
                 
                 // Gradient clipping
                 double threshold = 1.0;
@@ -91,9 +117,7 @@ void NeuralNetwork::updateWeights()
 
 void NeuralNetwork::backPropagation(Vector &expected)
 {
-    std::cout << "backpropagation" << std::endl;
     calculateCost(expected);
-    std::cout << "calculated cost" << std::endl;
     updateWeights();
 }
 
@@ -176,7 +200,6 @@ void NeuralNetwork::loadFromFile(std::string filneame)
             _costs.push_back(new Vector(tmp));
             _caches.push_back(new Vector(tmp));
             _config.push_back(tmp);
-            std::cout << "config :" << std::endl;
             for (int j = 0 ; j < _config.size() ; j++) {
                 std::cout << _config[j] << " ";
             }
