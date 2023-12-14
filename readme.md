@@ -49,12 +49,12 @@ This program can be use to perform various operation on a neural network, here i
 ## Benchmark
 
 ```mermaid
-    xychart beta
-    title Neural network accuracy
-    x-axis jan feb mar apr may jun jul aug sep oct nov dec
-    y-axis Accuracy (in %) 0 --> 100
-    data bar
-        0 40 60 80 90 95 85 88 92 94 96 98
-    data line
-        0 30 50 70 85 92 80 82 85 88 90 92
+    xyDiagram
+        title Neural network accuracy
+        x-axis type=category label="Months" categories="jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec"
+        y-axis label="Accuracy (in %)" min=0 max=100
+        data bar
+            "jan":40, "feb":60, "mar":80, "apr":90, "may":95, "jun":85, "jul":88, "aug":92, "sep":94, "oct":96, "nov":98, "dec":100
+        data line
+            "jan":30, "feb":50, "mar":70, "apr":85, "may":92, "jun":80, "jul":82, "aug":85, "sep":88, "oct":90, "nov":92, "dec":94
 ```
