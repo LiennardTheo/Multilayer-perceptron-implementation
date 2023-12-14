@@ -19,6 +19,7 @@ typedef struct Parsing {
     std::string saveFile;
     std::string chessboardsFile;
     std::string activationFunction = "tanhf";
+    int DataSize = 10000;
     float learningRate = 0.005;
 } Parsing_t;
 

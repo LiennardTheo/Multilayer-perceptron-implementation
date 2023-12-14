@@ -18,7 +18,7 @@ Parsing_t parseArgs(int ac, char **av)
     int opt;
     Parsing_t parsing;
 
-    while ((opt = getopt(ac, av, "hn:l:tps:r:m:")) != -1) {
+    while ((opt = getopt(ac, av, "hn:l:t:p:s:r:m:")) != -1) {
         switch (opt) {
             case 'h':
                 usage();
@@ -35,9 +35,11 @@ Parsing_t parseArgs(int ac, char **av)
                 break;
             case 't':
                 parsing.trainMode = true;
+                parsing.DataSize = std::stoi(optarg);
                 break;
             case 'p':
                 parsing.predictMode = true;
+                parsing.DataSize = std::stoi(optarg);
                 break;
             case 's':
                 parsing.saveFile = optarg;

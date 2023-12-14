@@ -213,7 +213,7 @@ void process(NeuralNetwork &network, Parsing_t &parsing)
 
     if (parsing.predictMode || parsing.trainMode) {
         std::cout << "Parsing chessboards file :" << parsing.chessboardsFile << "..." << std::endl;
-        parseChessFile(parsing.chessboardsFile, 1, 1000000, input, output);
+        parseChessFile(parsing.chessboardsFile, 1, parsing.DataSize, input, output);
         std::cout << "Parsing done" << std::endl;
         std::cout << "Shuffling..." << std::endl;
         shuffle(input, output);
