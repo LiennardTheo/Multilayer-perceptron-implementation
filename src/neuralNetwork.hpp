@@ -46,6 +46,7 @@ class NeuralNetwork {
         std::vector<int> _config;
         std::function<float(float)> _activationFunction;
         std::function<float(float)> _activationFunctionDerivative;
+        std::string _activationFunctionName;
         float _learningRate;
 };
 

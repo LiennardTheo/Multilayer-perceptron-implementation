@@ -67,7 +67,7 @@ NeuralNetwork::NeuralNetwork(std::vector<int> config, std::string activation, fl
         std::cerr << "Invalid activation function" << std::endl;
         exit(84);
     }
-
+    _activationFunctionName = activation;
     debugPrints();
 }
 
@@ -193,6 +193,14 @@ void NeuralNetwork::saveToFile(std::string filename)
             file << std::endl;
         }
 
+        file << "learningRate: " << _learningRate << std::endl;
+        file << "activationFunction: " << _activationFunctionName << std::endl;
+
+        file.close();
+
+    } else {
+        std::cerr << "Couldn't open file" << std::endl;
+        exit(84);
     }
 }
 
@@ -236,6 +244,33 @@ void NeuralNetwork::loadFromFile(std::string filneame)
                 file >> _bias[i]->coeffRef(j);
             }
         }
+
+        std::string tmp;
+        file >> tmp;
+        file >> _learningRate;
+        file >> tmp;
+        file >> _activationFunctionName;
+        std::cout << "learning rate: " << _learningRate << std::endl;
+        std::cout << "activation function: " << _activationFunctionName << std::endl;
+
+        //initialize activation function
+        if (_activationFunctionName == "tanhf") {
+            _activationFunction = std::function<float(float)>(tanhf_activation);
+            _activationFunctionDerivative = std::function<float(float)>(tanhf_activationFunctionDerivative);
+        } else if (_activationFunctionName == "sigmoid") {
+            _activationFunction = std::function<float(float)>(sigmoid);
+            _activationFunctionDerivative = std::function<float(float)>(sigmoid_activationFunctionDerivative);
+        } else {
+            std::cerr << "Invalid activation function" << std::endl;
+            exit(84);
+        }
+        std::cout << "loaded =" << _activationFunction(0.5) << std::endl;
+        std::cout << "sigmoid =" << sigmoid(0.5) << std::endl;
+        std::cout << "tanhf =" << tanhf(0.5) << std::endl;
+
+    } else {
+        std::cerr << "Couldn't open file" << std::endl;
+        exit(84);
     }
 }
 
