@@ -69,7 +69,24 @@ and the best was also to train the network with a large dataset (around 500 000 
 
 Then i tried to train a network to detect 3 states of the game, Checkmates, Pats, and Nothing, so i had to change the architecture of the network, i tried a lot of different architectures, but the best i found was:
 
+- 64 input neurons
+- 26 hidden neurons
+- 43 hidden neurons
+- 3 output neurons
 
+- learning rate: 0.009
+- activation function: tanh
+
+I found it by trying all possible combinations of neurons, and i found that the best was to have a lot of hidden neurons, and i also tried to have a lot of hidden layers, but it didn't improve the accuracy, so i kept it with 2 hidden layers.
+
+Here is a diagram of how it went:
+
+![Alt text](/images/2output.png "Optional title")
+
+So as you can see, i made a comparaison between the sigmoid and the tanh activation function.
+The sigmoid function have a better output on certain really precise cases, but the tanh function is more stable and have a better accuracy overall, so i kept it.
+
+The tanh also recognize a lot better checkmates than the sigmoid, and that's because the sigmoid function is more sensitive to the vanishing gradient problem, so it's better to use the tanh function.
 
 ## Optimizations
 
@@ -80,7 +97,6 @@ The main optimization i did was to use a gradient descent algorithm ,coupled wit
 I also did a shuffle of the dataset before training, so that the network doesn't learn the data in the same order, and it also helps to avoid the vanishing gradient problem.
 
 
+## Further Enhancements
 
-Architecture,
-Learning rate,
-Activation function,
+Future enhancements could involve exploring additional activation functions, experimenting with different optimization algorithms, and potentially incorporating more sophisticated network architectures.

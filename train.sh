@@ -1,0 +1,1 @@
+./myTorch -n 64 32 32 3 -s Network -t 500 -r 0.001 datasets/boards/10_pieces.txt datasets/checkmate/20_pieces.txt datasets/boards/20_pieces.txt datasets/checkmate/lots_pieces.txt datasets/checkmate/10_pieces.txt datasets/boards/lots_pieces.txt

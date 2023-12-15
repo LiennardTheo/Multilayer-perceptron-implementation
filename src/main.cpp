@@ -218,12 +218,11 @@ void process(NeuralNetwork &network, Parsing_t &parsing)
         std::cout << "Shuffling..." << std::endl;
         shuffle(input, output);
         std::cout << "Shuffling done" << std::endl;
-        findBest(input, output);
-        exit(0); findBest(input, output);
+        // findBest(input, output);
 
         if (parsing.trainMode) {
             std::cout << "Training..." << std::endl;
-            // network.train(input, output);
+            network.train(input, output);
             std::cout << "Training done" << std::endl;
         } else if (parsing.predictMode) {
             exploit(network, input, output);
@@ -283,7 +282,7 @@ void findBest(std::vector<Vector> &input, std::vector<Vector> &output)
     for (int i = 16 ; i < 64 ; i++) {
         for (int j = 16 ; j < 64 ; j++) {
             for (float lr = 0.001 ; lr < 0.01 ; lr += 0.001) {
-                NeuralNetwork network({64, i, j, 3}, "tanhf", lr);
+                NeuralNetwork network({64, i, j, 3}, "sigmoid", lr);
                 network.train(input, output);
                 shuffle(input, output);
                 int count = exploit(network, input, output);
