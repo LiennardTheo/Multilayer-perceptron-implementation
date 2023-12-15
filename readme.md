@@ -48,11 +48,6 @@ This program can be use to perform various operation on a neural network, here i
 
 ## Benchmark
 
-```mermaid
-xychart-beta
-    title "Sales Revenue"
-    x-axis [jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec]
-    y-axis "Revenue (in $)" 4000 --> 11000
-    bar [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]
-    line [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]
-```
+So first of all i tested my neural network implementation by detecting checkmate or not, it's a pretty easy task so it was perfect to test my algorithm, here is a diagram of how it went:
+
+![Alt text](/images/1output.png "Optional title")
