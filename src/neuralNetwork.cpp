@@ -9,6 +9,14 @@
 
 #include <fstream>
 
+float relu(float x) {
+    return (x > 0) ? x : 0;
+}
+
+float relu_activationFunctionDerivative(float x) {
+    return (x > 0) ? 1 : 0;
+}
+
 float tanhf_activation(float x)
 {
     return tanhf(x);
@@ -63,6 +71,9 @@ NeuralNetwork::NeuralNetwork(std::vector<int> config, std::string activation, fl
     } else if (activation == "sigmoid") {
         _activationFunction = std::function<float(float)>(sigmoid);
         _activationFunctionDerivative = std::function<float(float)>(sigmoid_activationFunctionDerivative);
+    } else if (activation == "relu") {
+        _activationFunction = std::function<float(float)>(relu);
+        _activationFunctionDerivative = std::function<float(float)>(relu_activationFunctionDerivative);
     } else {
         std::cerr << "Invalid activation function" << std::endl;
         exit(84);
@@ -75,13 +86,10 @@ void NeuralNetwork::propagateForward(Vector &input)
 {
     (*_neurons.front()) = input;
 
-    for (int i = 1 ; i < _neurons.size() - 1 ; i++) {
+    for (int i = 1 ; i < _neurons.size() ; i++) {
         *_neurons[i] = (*_neurons[i - 1]) * (*_weights[i - 1]);
         *_neurons[i] =  _neurons[i]->unaryExpr(_activationFunction);
     }
-
-    *_neurons.back() = (*_neurons[_neurons.size() - 2]) * (*_weights[_weights.size() - 1]);
-    *_neurons.back() = _neurons.back()->unaryExpr(std::function<float(float)>(sigmoid));
 }
 
 void NeuralNetwork::calculateCost(Vector &output)
@@ -95,21 +103,6 @@ void NeuralNetwork::calculateCost(Vector &output)
 
 void NeuralNetwork::updateWeights()
 {
-
-    // Update weights between last hidden layer and output layer using sigmoid activation function derivative
-    for (uint c = 0; c < _weights.back()->cols(); c++) {
-        for (uint r = 0; r < _weights.back()->rows(); r++) {
-            // Calcul du gradient
-            double gradient = _learningRate * _costs.back()->coeffRef(c) * sigmoid_activationFunctionDerivative(_caches.back()->coeffRef(c)) * _neurons[_neurons.size() - 2]->coeffRef(r);
-            
-            // Gradient clipping
-            double threshold = 1.0;
-            gradient = std::max(-threshold, std::min(gradient, threshold));
-
-            // Mise à jour des poids
-            _weights.back()->coeffRef(r, c) += gradient;
-        }
-    }
 
     for (uint i = 0; i < _config.size() - 1; i++) {
         for (uint c = 0; c < _weights[i]->cols(); c++) {
@@ -144,9 +137,9 @@ void NeuralNetwork::debugPrints()
 
     //count number total of weights
     int totalWeights = 0;
-    for (int j = 1 ; j < _weights.size() ; j++)
-        for (int k = 0 ; k < _weights[j]->rows() ; k++)
-            totalWeights += _weights[j - 1]->row(k).size();
+    for (int j = 0; j < _weights.size(); j++) {
+        totalWeights += _weights[j]->rows() * _weights[j]->cols();
+    }
     std::cout << "total weights: " << totalWeights << std::endl;
     
     //count number total of bias
@@ -160,7 +153,6 @@ void NeuralNetwork::train(std::vector<Vector> &input, std::vector<Vector> &outpu
 {
     std::cout << "training on dataSet of size :" << input.size() << std::endl;
     for (int i = 0 ; i < input.size() ; i++) {
-        std::cout << "board " << i << std::endl;
         propagateForward(input[i]);
         backPropagation(output[i]);
     }
@@ -260,6 +252,9 @@ void NeuralNetwork::loadFromFile(std::string filneame)
         } else if (_activationFunctionName == "sigmoid") {
             _activationFunction = std::function<float(float)>(sigmoid);
             _activationFunctionDerivative = std::function<float(float)>(sigmoid_activationFunctionDerivative);
+        } else if (_activationFunctionName == "relu") {
+            _activationFunction = std::function<float(float)>(relu);
+            _activationFunctionDerivative = std::function<float(float)>(relu_activationFunctionDerivative);
         } else {
             std::cerr << "Invalid activation function" << std::endl;
             exit(84);

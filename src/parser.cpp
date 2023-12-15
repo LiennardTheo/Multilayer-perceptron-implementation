@@ -57,9 +57,12 @@ Parsing_t parseArgs(int ac, char **av)
 
     // Retrieve the non-option argument (chessboards file)
     if (parsing.trainMode || parsing.predictMode) {
-        if (optind < ac)
-            parsing.chessboardsFile = av[optind];
-        else
+        if (optind < ac) {
+            while (optind < ac && *av[optind] != '-') {
+                parsing.chessboardsFile.push_back(av[optind]);
+                optind++;
+            }
+        } else
             usage();
     } else {
         if (optind > ac)

@@ -51,3 +51,36 @@ This program can be use to perform various operation on a neural network, here i
 So first of all i tested my neural network implementation by detecting checkmate or not, it's a pretty easy task so it was perfect to test my algorithm, here is a diagram of how it went:
 
 ![Alt text](/images/1output.png "Optional title")
+
+So as you can see, it started with a pretty bad accuracy, but after some tweaking of the hyperparameters, it reached a solid 95 % accuracy.
+
+The best hyperparameters i found were:
+
+- 64 input neurons
+- 32 hidden neurons
+- 16 hidden neurons
+- 1 output neuron
+
+- learning rate: 0.005
+- activation function: tanh
+
+and the best was also to train the network with a large dataset (around 500 000 exemples) and that's because a lot of the data is redundant, so it's better to have a lot of data to train the network.
+
+
+Then i tried to train a network to detect 3 states of the game, Checkmates, Pats, and Nothing, so i had to change the architecture of the network, i tried a lot of different architectures, but the best i found was:
+
+
+
+## Optimizations
+
+I tried to optimize the code as much as possible, so i used Eigen library for matrix computation.
+
+The main optimization i did was to use a gradient descent algorithm ,coupled with a clipping of this gradient, it is a way to avoid the vanishing gradient problem, and it also makes the training faster. The clipping is done by dividing the gradient by its norm, if the norm is greater than 1.
+
+I also did a shuffle of the dataset before training, so that the network doesn't learn the data in the same order, and it also helps to avoid the vanishing gradient problem.
+
+
+
+Architecture,
+Learning rate,
+Activation function,

@@ -12,6 +12,8 @@
 #include <sstream>
 #include <random>
 
+void findBest(std::vector<Vector> &input, std::vector<Vector> &output);
+
 void parseFEN(const std::string& fen, Vector& inputVec)
 {
     int index = 0;
@@ -163,7 +165,7 @@ void printBoard(Vector &input, Vector &output)
     std::cout << std::endl;
 }
 
-void exploit(NeuralNetwork &test, std::vector<Vector> &input, std::vector<Vector> &output)
+int exploit(NeuralNetwork &test, std::vector<Vector> &input, std::vector<Vector> &output)
 {
     int count = 0;
     int checkmates = 0;
@@ -171,14 +173,11 @@ void exploit(NeuralNetwork &test, std::vector<Vector> &input, std::vector<Vector
     int localCount = 0;
     for (int i = 0 ; i < input.size() ; i++) {
         test.propagateForward(input[i]);
-        std::cout << "board " << i << std::endl;
         for (int j = 0 ; j < output[i].size() ; j++) {
             if (test.getOutput()[j] > 0.5 && output[i][j] == 1)
                 localCount++;
             else if (test.getOutput()[j] < 0.5 && output[i][j] == 0)
                 localCount++;
-            else
-                std::cout << "output: " << test.getOutput()[j] << " expected: " << output[i][j] << std::endl;
         }
         if (localCount == output[i].size())
             count++;
@@ -189,8 +188,7 @@ void exploit(NeuralNetwork &test, std::vector<Vector> &input, std::vector<Vector
             boards++;
     }
     std::cout << "exploit: " << count << "/" << input.size() << std::endl;
-    std::cout << "checkmates: " << checkmates << std::endl;
-    std::cout << "boards: " << boards << std::endl;
+    return count;
 }
 
 void shuffle(std::vector<Vector> &input, std::vector<Vector> &output) {
@@ -212,16 +210,20 @@ void process(NeuralNetwork &network, Parsing_t &parsing)
     std::vector<Vector> output;
 
     if (parsing.predictMode || parsing.trainMode) {
-        std::cout << "Parsing chessboards file :" << parsing.chessboardsFile << "..." << std::endl;
-        parseChessFile(parsing.chessboardsFile, 1, parsing.DataSize, input, output);
+        for (int i = 0 ; i < parsing.chessboardsFile.size() ; i++) {
+            std::cout << "Parsing chessboards file :" << parsing.chessboardsFile[i] << "..." << std::endl;
+            parseChessFile(parsing.chessboardsFile[i], 1, parsing.DataSize, input, output);
+        }
         std::cout << "Parsing done" << std::endl;
         std::cout << "Shuffling..." << std::endl;
         shuffle(input, output);
         std::cout << "Shuffling done" << std::endl;
+        findBest(input, output);
+        exit(0); findBest(input, output);
 
         if (parsing.trainMode) {
             std::cout << "Training..." << std::endl;
-            network.train(input, output);
+            // network.train(input, output);
             std::cout << "Training done" << std::endl;
         } else if (parsing.predictMode) {
             exploit(network, input, output);
@@ -257,6 +259,8 @@ int main(int ac, char **av)
         std::cout << "Using sigmoid activation function" << std::endl;
     } else if (parsing.activationFunction == "tanhf") {
         std::cout << "Using tanhf activation function" << std::endl;
+    } else if (parsing.activationFunction == "relu") {
+        std::cout << "Using relu activation function" << std::endl;
     } else {
         std::cerr << "Error : Activation function not supported" << std::endl;
         usage();
@@ -271,4 +275,26 @@ int main(int ac, char **av)
     process(network, parsing);
 
     return 0;
+}
+
+void findBest(std::vector<Vector> &input, std::vector<Vector> &output)
+{
+    int max = 0;
+    for (int i = 16 ; i < 64 ; i++) {
+        for (int j = 16 ; j < 64 ; j++) {
+            for (float lr = 0.001 ; lr < 0.01 ; lr += 0.001) {
+                NeuralNetwork network({64, i, j, 3}, "tanhf", lr);
+                network.train(input, output);
+                shuffle(input, output);
+                int count = exploit(network, input, output);
+                if (count > max) {
+                    max = count;
+                    std::cout << "new max: " << max << std::endl;
+                    std::cout << "i: " << i << std::endl;
+                    std::cout << "j: " << j << std::endl;
+                    std::cout << "lr: " << lr << std::endl;
+                }
+            }
+        }
+    }
 }
